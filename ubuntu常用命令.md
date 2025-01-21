@@ -54,9 +54,11 @@ ufw reload						#重启防火墙（修改防火墙配置后需重启生效）
 
 ```
 
+### 4.配置git代理
 
+命令：`git config --global http.proxy http://192.168.0.164:10809/`
 
-
+删除：`git config --global --unset http.proxy`
 
 
 
