@@ -14,11 +14,22 @@ ufw delete allow 22 			#防火墙关闭指定端口
 ufw enable						#开启防火墙
 ufw disable						#关闭防火墙
 ufw reload						#重启防火墙（修改防火墙配置后需重启生效）
+apt install net-tools           #安装网络工具包
+netstat -antup | grep 80        #查看端口占用情况 -a显示所有选项；-t显示tcp；-u显示udp；-n不显示别名；-l列在listen的服务；-p显示程序名；-e显示扩									展信息
+kill -9 12345					#根据pid强制关闭程序
 
 
 ```
 
 
+
+# 开启root用户SSH连接
+
+1.修改root用户密码：`sudo passwd root`
+
+2.修改/etc/ssh/sshd_config文件，找到PermitRootLogin这一行，并将其修改为`PermitRootLogin yes`，表示允许root用户通过SSH登录
+
+3.重启ssh服务：`sudo systemctl restart sshd`
 
 # 配置代理
 
@@ -59,6 +70,12 @@ ufw reload						#重启防火墙（修改防火墙配置后需重启生效）
 命令：`git config --global http.proxy http://192.168.0.164:10809/`
 
 删除：`git config --global --unset http.proxy`
+
+# 将可执行文件添加为命令
+
+给文件添加可执行权限：`chmod +x file.sh`
+
+放至`/usr/local/bin`目录
 
 
 
