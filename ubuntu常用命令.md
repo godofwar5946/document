@@ -77,7 +77,130 @@ kill -9 12345					#根据pid强制关闭程序
 
 放至`/usr/local/bin`目录
 
+# 配置路由转发
 
+修改配置文件`/etc/sysctl.conf`，添加`net.ipv4.ip_forward = 1`
 
+使配置生效`sudo sysctl -p /etc/sysctl.conf`
 
+```bash
+sudo iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+sudo iptables -A FORWARD -i eth1 -o eth0 -m state --state ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+```
+
+```bash
+sudo iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+```
+
+- **`sudo`**: 以管理员权限执行命令。
+- **`iptables`**: Linux 的防火墙工具。
+- **`-A FORWARD`**: 将规则追加到 `FORWARD` 链（负责处理转发的数据包）。
+- **`-i eth0`**: 匹配输入接口为 `eth0`（通常指内网或 LAN）。
+- **`-o eth1`**: 匹配输出接口为 `eth1`（通常指外网或 WAN，如互联网）。
+- **`-j ACCEPT`**: 允许匹配的数据包通过。
+
+**作用**：允许从内网（`eth0`）到外网（`eth1`）的所有流量转发。
+
+```bash
+sudo iptables -A FORWARD -i eth1 -o eth0 -m state --state ESTABLISHED,RELATED -j ACCEPT
+```
+
+- **`-i eth1 -o eth0`**: 匹配从外网（`eth1`）返回内网（`eth0`）的流量。
+- **`-m state`**: 使用 `state` 模块检查连接状态。
+- **`--state ESTABLISHED,RELATED`**: 仅允许已建立的连接（如对请求的响应）或相关连接（如 FTP 辅助连接）。
+- **`-j ACCEPT`**: 允许匹配的数据包通过。
+
+**作用**：允许外网返回的响应流量（确保内网主机能收到请求的回复）。
+
+```bash
+sudo iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+```
+
+- **`t nat`**: 操作 `nat` 表（用于网络地址转换）。
+- **`-A POSTROUTING`**: 将规则追加到 `POSTROUTING` 链（数据包发出前的最后处理阶段）。
+- **`-o eth1`**: 匹配从 `eth1` 接口发出的数据包。
+- **`-j MASQUERADE`**: 将内网设备的私有 IP 伪装为 `eth1` 的公有 IP（动态 NAT）。
+
+**作用**：使内网设备通过 `eth1` 的公网 IP 访问外网，实现共享上网。
+
+# 开启远程桌面
+
+```bash
+sudo apt update
+sudo apt install xrdp -y
+sudo usermod -a-G ssl-cert xrdp
+sudo systemctl restart xrdp
+```
+
+# 离线安装mysql
+
+1.创建用户组
+
+```bash
+groupadd mysql     #创建用户组
+# -r 参数表示 mysql 用户是系统用户，不可用于登录系统，创建用户 mysql 并将其添加到用户组 mysql 中
+useradd -r -g mysql mysql
+```
+
+2.分配用户组
+
+```bash
+chown -R mysql /usr/local/mysql/ # 将文件的所有属性改为 mysql 用户
+chgrp -R mysql /usr/local/mysql/ # 将组属性改为 mysql 组
+```
+
+3.创建数据目录并授权
+
+```bash
+mkdir -p /data/mysql #数据目录
+chown mysql:mysql -R /data/mysql
+```
+
+4.新建my.cnf文件
+
+```bash
+[mysqld]
+bind-address=0.0.0.0
+port=3307
+user=mysql
+basedir=/usr/local/mysql-ircs //可执行文件位置
+datadir=/data/mysql-ircs		//数据文件存储位置
+socket=/tmp/mysql-ircs.sock
+log-error=/data/mysql-ircs/mysql-ircs.err  //日志文件位置
+pid-file= /data/mysql-ircs/mysql-ircs.pid	//进程位置
+#character config
+character_set_server=utf8mb4
+symbolic-links=0
+explicit_defaults_for_timestamp=true
+server-id=10  //多实例时需要区分
+```
+
+5.初始化数据库
+
+使用命令初始化，需要修改对应参数  `./mysqld --defaults-file=/etc/my.cnf --basedir=/usr/local/mysql/ --datadir=/data/mysql/ --user=mysql --initialize`
+
+6.查看初始密码
+
+在log-error目录中，有对应的初始密码
+
+7.设置开机启动
+
+```bash
+cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
+service mysql start
+```
+
+8.登录mysql
+
+```bash
+mysql -u root -h 127.0.0.1 -P 22 -p
+```
+
+9.修改密码
+
+```bash
+ALTER USER 'root'@'localhost' IDENTIFIED BY '1234';
+FLUSH PRIVILEGES; 
+```
 
