@@ -133,6 +133,21 @@ sudo usermod -a-G ssl-cert xrdp
 sudo systemctl restart xrdp
 ```
 
+**特殊情况**：如果需要在windows上使用远程桌面连接到ubuntu上，可能需要切换到X11
+使用以下命令查看当前的协议
+```bash
+echo $XDG_SESSION_TYPE
+```
+如果输出不为X11，则可能需要更改配置文件
+```bash
+
+sudo nano /etc/gdm3/custom.conf # 编辑 gdm3 配置文件
+#找到这一行，取消注释，并设置为false
+WaylandEnable=false
+sudo systemctl restart gdm3 # 重启 gdm3 服务使配置生效
+
+echo $XDG_SESSION_TYPE #验证是否切换成功
+```
 # 离线安装mysql
 
 1.创建用户组
