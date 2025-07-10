@@ -15,10 +15,8 @@ ufw enable						#开启防火墙
 ufw disable						#关闭防火墙
 ufw reload						#重启防火墙（修改防火墙配置后需重启生效）
 apt install net-tools           #安装网络工具包
-netstat -antup | grep 80        #查看端口占用情况 -a显示所有选项；-t显示tcp；-u显示udp；-n不显示别名；-l列在listen的服务；-p显示程序名；-e显示扩									展信息
+netstat -antup | grep 80        #查看端口占用情况 -a显示所有选项；-t显示tcp；-u显示udp；-n不显示别名；-l列在listen的服务；-p显示程序名；-e显示扩展信息
 kill -9 12345					#根据pid强制关闭程序
-
-
 ```
 
 
@@ -30,6 +28,24 @@ kill -9 12345					#根据pid强制关闭程序
 2.修改/etc/ssh/sshd_config文件，找到PermitRootLogin这一行，并将其修改为`PermitRootLogin yes`，表示允许root用户通过SSH登录
 
 3.重启ssh服务：`sudo systemctl restart sshd`
+
+# 免密SSH登录
+
+1. 修改要登录的主机 /etc/ssh/sshd_config文件，找到AuthorizedKeysFile这一行，空格后写公钥内容文件位置，如 ~/.ssh/authorized_keys
+
+2. 在本机上生成ssh证书
+```bash
+ssh-keygen -t rsa -b 1024 -C "comment here"
+# -t 选择密钥类型，可选项有 dsa | ecdsa | ecdsa-sk | ed25519 | ed25519-sk | rsa
+# -b 指定长度 
+# -C 指定注释，会加到生成的.pub文件最后
+```
+3. 将生成的文件中，.pub文件的内容，复制到远程主机的 authorized_keys 文件中，每行一个
+
+4. 重启远程主机的ssh
+```bash
+sudo systemctl restart ssh
+```
 
 # 配置代理
 
@@ -141,7 +157,7 @@ echo $XDG_SESSION_TYPE
 如果输出不为X11，则可能需要更改配置文件
 ```bash
 
-sudo nano /etc/gdm3/custom.conf # 编辑 gdm3 配置文件
+sudo vim /etc/gdm3/custom.conf # 编辑 gdm3 配置文件
 #找到这一行，取消注释，并设置为false
 WaylandEnable=false
 sudo systemctl restart gdm3 # 重启 gdm3 服务使配置生效
