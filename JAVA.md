@@ -195,4 +195,4 @@ LineReader lineReader = LineReaderBuilder.builder()
 String userInput = lineReader.readLine();
 ```
 
-注意：在使用jline时，需要在打包后，手动修改`META-INF\native-image\org.jline`目录下所有文件夹中的`native-image.properties`文件的`UnlockExperimentalVMOptions`属性
+**注意：**在使用jline时，需要在打包后，手动修改`META-INF\native-image\org.jline`目录下所有文件夹中的`native-image.properties`文件的`UnlockExperimentalVMOptions`属性
