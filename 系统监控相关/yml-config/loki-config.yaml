@@ -1,0 +1,34 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2025-01-01
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+storage_config: # 存储相关
+  boltdb_shipper:
+    active_index_directory: /loki/boltdb-shipper-active # 活动索引的目录
+    cache_location: /loki/boltdb-shipper-cache # 缓存位置
+    cache_ttl: 24h # 缓存的过期时间
+    shared_store: filesystem # 共享存储类型为文件系统
+  filesystem:
+    directory: /loki/chunks # 文件系统的目录
