@@ -14,7 +14,7 @@ services:
   promtail:
     image: grafana/promtail:latest
     ports:
-      - "3100:3100"
+      - "3101:3101"
     volumes:
       - /var/log:/var/log
       - /etc/localtime:/etc/localtime:ro
